@@ -1,0 +1,228 @@
+syntax = "proto3";
+//соответствует таблице stream_types
+enum StreamType {
+    AudioVideoTS = 0;
+    AudioOnlyAAC = 1;
+    VideoOnlyTS = 2;
+};
+
+message Node {
+    string name = 1;
+    string region = 2;
+}
+
+message NodeList {
+    repeated Node nodes = 1;
+}
+
+//элемент расписания, ToUTS=0 - лайв
+message TimeRange {
+    int32 FromUTS = 1;
+    int32 ToUTS = 2;
+};
+
+message requestEntry {
+    TimeRange TimeRange = 1;
+    int64 StreamerId = 2;
+};
+
+message ChunkContainerRequest {
+    TimeRange TimeRange = 1;
+    ChunkContainer chunkContainer = 2;
+    NodeList Nodes = 3;
+}
+
+//расписание  BearingStreamid - опорный поток
+message playlistRequest {
+    repeated requestEntry RequestEntryList = 1;
+    int32 revalidate_period = 2;
+    int64 GenerateTimeUTS = 3;
+    int32 BearingStreamid = 4;
+    Node sourceNode = 5;
+};
+
+//плейлист с чанками из потока BearingStreamid
+message playlist {
+    repeated playlistEntry PlaylistEntry = 1;
+    int32 revalidate_period = 2;
+    int64 GenerateTimeUTS = 3;
+    int64 EventId = 4;
+    Node sourceNode = 5;
+};
+
+//группа элементов плейлиста, соответствующий requestEntry
+message playlistEntry {
+    repeated playlistSts PlaylistStsList = 1;
+};
+
+//элемент плейлиста - список чанков в конкретном sts для потока BearingStreamid и статистикой по всем потокам в этом sts
+//статистика по потокам - хеш, где ключом является streamid
+message playlistSts {
+    int32 StsUTS = 1;
+    repeated chunk ChunkList = 2;
+    map<int32, playlistMetaEntry> metaEnties = 3;
+};
+
+//чанк
+message chunk {
+    int32 Counter = 1;
+    int32 Duration = 2;
+    int32 cts = 3;
+    int64 ArrivalTime = 5;
+    int32 ChunkSize = 6;
+    bool  IsLast = 7;
+};
+
+//чанклист
+message chunkList {
+    repeated chunk Chunks = 1;
+    ChunkContainer ChunkContainer=2;
+    Node SourceNode =3;
+};
+
+//статистика по sts конкретного потока
+message playlistMetaEntry {
+    int32 EntryMaxBitRate = 1;
+    int32 EntryAvgBitRate = 2;
+    int32 EntryMaxCounter = 3;
+    int32 EntryMinDuration = 4;
+    int32 EntryMaxDuration = 5;
+};
+
+//запрос на получение playlistRequest
+message EventRequest {
+    repeated int64 EventId = 1;
+}
+
+//запрос на получение данных или регистрацию стримера
+message StreamerRequest {
+    string StreamerName = 1;
+    string SharedKey = 2;
+    bool AutoRegister = 3;
+}
+
+//учетная карточка стримера
+message StreamerInfo {
+    int64 StreamerId = 1;
+    bool IsNewStreamer = 2;
+    int64 LastEventId = 3;
+    string StreamerName = 4;
+}
+
+//запрос на создание эвента со списком элементов расписаний
+message CreateEventRequest {
+    playlistRequest PlaylistRequest = 1;
+    int64 EventId = 2;
+    int64 GenerateTimeUTS = 3;
+};
+
+message zeromessage {
+}
+
+//полный идентификатор чанка
+message ChunkMetaData {
+    ChunkContainer chunkContainer = 1;
+    chunk Chunk =2;
+}
+message ContainerMetaData {
+    ChunkContainer chunkContainer = 1;
+    ContainerStat containerStat =2;
+}
+//полный идентификатор контейнера чанка
+message ChunkContainer {
+    int64 StreamerId = 1;
+    int32 sts = 2;
+    int32 streamid = 4;
+}
+
+//описание потока
+message StreamDescriptor {
+    int32 streamid = 1;
+    StreamType Type = 2;
+    string Name = 3;
+}
+
+//список потоков на платформе
+message StreamsEnum {
+    map<string, StreamDescriptor> Map = 1;
+    int32 revalidate_period = 2;
+    int64 GenerateTimeUTS = 3;
+}
+
+message MediaInfo {
+    string codecs = 1;
+    string resolution = 2;
+    uint32 bitrate = 3;
+    uint32 fps = 4;
+    uint32 keyframe = 5;
+    string sar = 6;
+    string dar = 7;
+}
+
+message ContainerStat {
+    bool ContainLastChunk = 1;
+    int32 maxCts = 2;
+    int32 maxCounter = 3;
+    int32 length = 4;
+    MediaInfo MediaInfo =5;
+}
+
+message StreamerStsRoute {
+    ChunkContainer chunkContainer = 1;
+    ContainerStat containerStat = 2;
+    Node sourceNode = 3;
+}
+
+message StreamerStsRoutes {
+    repeated StreamerStsRoute Routes = 1;
+}
+
+service StorageService {
+    //получение плейлиста с обновлениями
+    rpc CreateContainer (ContainerMetaData) returns (zeromessage);
+    rpc GetContainer (ChunkContainerRequest) returns (stream chunkList);
+};
+
+service MetaGlobalService {
+    //список потоков на платформе
+    rpc GetStreamsAvailable (zeromessage) returns (StreamsEnum);
+    //получение расписания по эвенту
+    rpc GetPlaylistRequest (EventRequest) returns (playlistRequest);
+    //запрос на получение данных или регистрацию стримера
+    rpc GetStreamerInfo (StreamerRequest) returns (StreamerInfo);
+    //запрос на создание эвента
+    rpc CreateEvent (CreateEventRequest) returns (zeromessage);
+    rpc GetEventRequest (requestEntry) returns (EventRequest);
+};
+
+service StreamRouterService {
+    //todo GetLastContainers
+    //маршруты по контейнеру
+    rpc GetRouteByContainer (ChunkContainer) returns (StreamerStsRoutes);
+    //маршруты по элементу расписания,информирование о новых маршрутах
+    rpc GetRouteByRequestEntry (requestEntry) returns (stream StreamerStsRoutes);
+    rpc RegisterRoutes (StreamerStsRoutes) returns (zeromessage);
+};
+
+service StreamRouterAdvertiseService {
+    //обновление маршрутов
+    rpc AdvertiseRoute (stream StreamerStsRoutes) returns (zeromessage);
+};
+
+service ControlService {
+    rpc RegisterUser (StreamerRequest) returns (StreamerInfo);
+    rpc RegisterContainer (ContainerMetaData) returns (NodeList);
+};
+
+message heartbeatState {
+    enum method {
+        ping = 0;
+        pong = 1;
+    }
+    method Method = 1;
+    int64  payload = 2;
+}
+
+service heartbeat {
+    rpc StateStream (stream heartbeatState) returns (stream heartbeatState);
+}

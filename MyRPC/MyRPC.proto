@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+message Entry {
+    string type = 1;
+    int64 value = 2;
+}
+
+message Data {
+    string str1 = 1;
+    string str2 = 2;
+    int64 i64 = 3;
+    int32 i32 = 4;
+    repeated Entry arr = 5;
+}
+
+message SimpleData {
+    string str1 = 1;
+    string str2 = 2;
+    int64 i64 = 3;
+    int32 i32 = 4;
+}
