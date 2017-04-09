@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"pgtest/MyDB"
-	"pgtest/MyRPC"
+	"github.com/Eetin/go_postgres_benchmarks/pgtest/MyDB"
+	"github.com/Eetin/go_postgres_benchmarks/pgtest/MyRPC"
 )
 
 const USER = "postgres"
