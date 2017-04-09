@@ -5,7 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"pgtest/MyRPC"
+	"github.com/Eetin/go_postgres_benchmarks/pgtest/MyRPC"
 	"testing"
 	"time"
 )
