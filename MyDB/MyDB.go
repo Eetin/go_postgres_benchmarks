@@ -7,7 +7,7 @@ import (
 
 	"fmt"
 
-	"pgtest/MyRPC"
+	"github.com/Eetin/go_postgres_benchmarks/pgtest/MyRPC"
 
 	_ "github.com/lib/pq"
 )
