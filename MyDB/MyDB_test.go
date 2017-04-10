@@ -5,9 +5,10 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"github.com/Eetin/go_postgres_benchmarks/MyRPC"
 	"testing"
 	"time"
+
+	"github.com/Eetin/go_postgres_benchmarks/MyRPC"
 )
 
 const USER = "postgres"
@@ -43,8 +44,10 @@ func clearDB() {
 func fillDB(n int) {
 	for i := 0; i < n; i++ {
 		data := generateSimpleData()
+		noStrData := generateNoStrData()
 		database.InsertData(i, data)
 		database.InsertProtoData(i, data)
+		database.InsertProtoDataNoStr(i, noStrData)
 	}
 }
 
@@ -55,6 +58,23 @@ func generateRandomString(length int) string {
 		result[i] = chars[rand.Intn(len(chars))]
 	}
 	return string(result)
+}
+
+func generateNoStrData() *MyRPC.NoStrData {
+	var entries []*MyRPC.NoStrEntry
+	for i := 0; i < 10; i++ {
+		entries = append(entries, &MyRPC.NoStrEntry{
+			rand.Int63(),
+			true,
+			rand.Int31(),
+		})
+	}
+	data := &MyRPC.NoStrData{
+		rand.Int63(),
+		rand.Int31(),
+		entries,
+	}
+	return data
 }
 
 func generateSimpleData() *MyRPC.SimpleData {
@@ -84,7 +104,6 @@ func TestMain(m *testing.M) {
 //	}
 //}
 
-
 func BenchmarkDB_GetProtoDataRange(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		database.GetProtoDataRange(4000, 70000)
@@ -94,5 +113,11 @@ func BenchmarkDB_GetProtoDataRange(b *testing.B) {
 func BenchmarkDB_GetDataRange(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		database.GetDataRange(4000, 70000)
+	}
+}
+
+func BenchmarkDB_GetProtoDataRangeNoStr(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		database.GetProtoDataRangeNoStr(4000, 70000)
 	}
 }

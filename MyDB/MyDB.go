@@ -40,8 +40,37 @@ func (db *DB) InsertProtoData(index int, data *MyRPC.SimpleData) {
 	}
 }
 
+func (db *DB) InsertProtoDataNoStr(index int, data *MyRPC.NoStrData) {
+	dbdata, err := data.Marshal()
+	if err != nil {
+		log.Fatal("Marshal err2: ", err)
+	}
+	query := fmt.Sprintf("INSERT INTO test3 (index, data) VALUES (%d, $1)", index)
+	_, err2 := db.DBHandler.Exec(query, dbdata)
+	if err2 != nil {
+		log.Fatal("DB err2: ", err2)
+	}
+}
+
 func (db *DB) GetProtoData(index int, mydata *MyRPC.SimpleData) {
 	rows, err := db.DBHandler.Query(fmt.Sprintf("SELECT data FROM test WHERE index=%d", index))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	data := make([]byte, 0)
+	for rows.Next() {
+		err := rows.Scan(&data)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	mydata.Unmarshal(data)
+}
+
+func (db *DB) GetProtoDataNoStr(index int, mydata *MyRPC.NoStrData) {
+	rows, err := db.DBHandler.Query(fmt.Sprintf("SELECT data FROM test3 WHERE index=%d", index))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,6 +95,28 @@ func (db *DB) GetProtoDataRange(from int, to int) {
 
 	element:=&MyRPC.SimpleData{}
 	buf:=make([]byte,element.Size())
+	for rows.Next() {
+		err := rows.Scan(&buf)
+		if err != nil {
+			log.Fatal("Simple get: ", err)
+		}
+		err=element.Unmarshal(buf)
+		if err != nil {
+			log.Fatal("Simple get: ", err)
+		}
+
+	}
+}
+
+func (db *DB) GetProtoDataRangeNoStr(from int, to int) {
+	rows, err := db.DBHandler.Query(fmt.Sprintf("SELECT data FROM test3"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	element := &MyRPC.NoStrData{}
+	buf := make([]byte, element.Size())
 	for rows.Next() {
 		err := rows.Scan(&buf)
 		if err != nil {

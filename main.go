@@ -35,13 +35,13 @@ func main() {
 	//db.InsertData(0, &simpleData)
 	//db.GetData(0, &MyRPC.SimpleData{})
 	var dataRange = make([]*MyRPC.SimpleData, 10)
-	db.GetDataRange(100, 110, dataRange)
+	db.GetDataRange(100, 110)
 	for i := range dataRange {
 		log.Println("data ", i, ": ", dataRange[i])
 	}
 
 	var protoDataRange = make([]*MyRPC.SimpleData, 10)
-	db.GetProtoDataRange(100, 110, protoDataRange)
+	db.GetProtoDataRange(100, 110)
 	for i := range protoDataRange {
 		log.Println("protodata ", i, ": ", protoDataRange[i])
 	}

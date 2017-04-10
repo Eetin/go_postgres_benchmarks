@@ -5,6 +5,12 @@ message Entry {
     int64 value = 2;
 }
 
+message NoStrEntry {
+    int64 value = 1;
+    bool ready = 2;
+    int32 value2 = 3;
+}
+
 message Data {
     string str1 = 1;
     string str2 = 2;
@@ -18,4 +24,10 @@ message SimpleData {
     string str2 = 2;
     int64 i64 = 3;
     int32 i32 = 4;
+}
+
+message NoStrData {
+    int64 i64 = 1;
+    int32 i32 = 2;
+    repeated NoStrEntry arr = 3;
 }

@@ -10,8 +10,10 @@
 
 	It has these top-level messages:
 		Entry
+		NoStrEntry
 		Data
 		SimpleData
+		NoStrData
 */
 package MyRPC
 
@@ -56,6 +58,38 @@ func (m *Entry) GetValue() int64 {
 	return 0
 }
 
+type NoStrEntry struct {
+	Value  int64 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
+	Ready  bool  `protobuf:"varint,2,opt,name=ready,proto3" json:"ready,omitempty"`
+	Value2 int32 `protobuf:"varint,3,opt,name=value2,proto3" json:"value2,omitempty"`
+}
+
+func (m *NoStrEntry) Reset()                    { *m = NoStrEntry{} }
+func (m *NoStrEntry) String() string            { return proto.CompactTextString(m) }
+func (*NoStrEntry) ProtoMessage()               {}
+func (*NoStrEntry) Descriptor() ([]byte, []int) { return fileDescriptorMyRPC, []int{1} }
+
+func (m *NoStrEntry) GetValue() int64 {
+	if m != nil {
+		return m.Value
+	}
+	return 0
+}
+
+func (m *NoStrEntry) GetReady() bool {
+	if m != nil {
+		return m.Ready
+	}
+	return false
+}
+
+func (m *NoStrEntry) GetValue2() int32 {
+	if m != nil {
+		return m.Value2
+	}
+	return 0
+}
+
 type Data struct {
 	Str1 string   `protobuf:"bytes,1,opt,name=str1,proto3" json:"str1,omitempty"`
 	Str2 string   `protobuf:"bytes,2,opt,name=str2,proto3" json:"str2,omitempty"`
@@ -67,7 +101,7 @@ type Data struct {
 func (m *Data) Reset()                    { *m = Data{} }
 func (m *Data) String() string            { return proto.CompactTextString(m) }
 func (*Data) ProtoMessage()               {}
-func (*Data) Descriptor() ([]byte, []int) { return fileDescriptorMyRPC, []int{1} }
+func (*Data) Descriptor() ([]byte, []int) { return fileDescriptorMyRPC, []int{2} }
 
 func (m *Data) GetStr1() string {
 	if m != nil {
@@ -114,7 +148,7 @@ type SimpleData struct {
 func (m *SimpleData) Reset()                    { *m = SimpleData{} }
 func (m *SimpleData) String() string            { return proto.CompactTextString(m) }
 func (*SimpleData) ProtoMessage()               {}
-func (*SimpleData) Descriptor() ([]byte, []int) { return fileDescriptorMyRPC, []int{2} }
+func (*SimpleData) Descriptor() ([]byte, []int) { return fileDescriptorMyRPC, []int{3} }
 
 func (m *SimpleData) GetStr1() string {
 	if m != nil {
@@ -144,10 +178,44 @@ func (m *SimpleData) GetI32() int32 {
 	return 0
 }
 
+type NoStrData struct {
+	I64 int64         `protobuf:"varint,1,opt,name=i64,proto3" json:"i64,omitempty"`
+	I32 int32         `protobuf:"varint,2,opt,name=i32,proto3" json:"i32,omitempty"`
+	Arr []*NoStrEntry `protobuf:"bytes,3,rep,name=arr" json:"arr,omitempty"`
+}
+
+func (m *NoStrData) Reset()                    { *m = NoStrData{} }
+func (m *NoStrData) String() string            { return proto.CompactTextString(m) }
+func (*NoStrData) ProtoMessage()               {}
+func (*NoStrData) Descriptor() ([]byte, []int) { return fileDescriptorMyRPC, []int{4} }
+
+func (m *NoStrData) GetI64() int64 {
+	if m != nil {
+		return m.I64
+	}
+	return 0
+}
+
+func (m *NoStrData) GetI32() int32 {
+	if m != nil {
+		return m.I32
+	}
+	return 0
+}
+
+func (m *NoStrData) GetArr() []*NoStrEntry {
+	if m != nil {
+		return m.Arr
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*Entry)(nil), "Entry")
+	proto.RegisterType((*NoStrEntry)(nil), "NoStrEntry")
 	proto.RegisterType((*Data)(nil), "Data")
 	proto.RegisterType((*SimpleData)(nil), "SimpleData")
+	proto.RegisterType((*NoStrData)(nil), "NoStrData")
 }
 func (m *Entry) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
@@ -174,6 +242,44 @@ func (m *Entry) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x10
 		i++
 		i = encodeVarintMyRPC(dAtA, i, uint64(m.Value))
+	}
+	return i, nil
+}
+
+func (m *NoStrEntry) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *NoStrEntry) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if m.Value != 0 {
+		dAtA[i] = 0x8
+		i++
+		i = encodeVarintMyRPC(dAtA, i, uint64(m.Value))
+	}
+	if m.Ready {
+		dAtA[i] = 0x10
+		i++
+		if m.Ready {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i++
+	}
+	if m.Value2 != 0 {
+		dAtA[i] = 0x18
+		i++
+		i = encodeVarintMyRPC(dAtA, i, uint64(m.Value2))
 	}
 	return i, nil
 }
@@ -270,6 +376,46 @@ func (m *SimpleData) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
+func (m *NoStrData) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *NoStrData) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if m.I64 != 0 {
+		dAtA[i] = 0x8
+		i++
+		i = encodeVarintMyRPC(dAtA, i, uint64(m.I64))
+	}
+	if m.I32 != 0 {
+		dAtA[i] = 0x10
+		i++
+		i = encodeVarintMyRPC(dAtA, i, uint64(m.I32))
+	}
+	if len(m.Arr) > 0 {
+		for _, msg := range m.Arr {
+			dAtA[i] = 0x1a
+			i++
+			i = encodeVarintMyRPC(dAtA, i, uint64(msg.Size()))
+			n, err := msg.MarshalTo(dAtA[i:])
+			if err != nil {
+				return 0, err
+			}
+			i += n
+		}
+	}
+	return i, nil
+}
+
 func encodeFixed64MyRPC(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	dAtA[offset+1] = uint8(v >> 8)
@@ -306,6 +452,21 @@ func (m *Entry) Size() (n int) {
 	}
 	if m.Value != 0 {
 		n += 1 + sovMyRPC(uint64(m.Value))
+	}
+	return n
+}
+
+func (m *NoStrEntry) Size() (n int) {
+	var l int
+	_ = l
+	if m.Value != 0 {
+		n += 1 + sovMyRPC(uint64(m.Value))
+	}
+	if m.Ready {
+		n += 2
+	}
+	if m.Value2 != 0 {
+		n += 1 + sovMyRPC(uint64(m.Value2))
 	}
 	return n
 }
@@ -352,6 +513,24 @@ func (m *SimpleData) Size() (n int) {
 	}
 	if m.I32 != 0 {
 		n += 1 + sovMyRPC(uint64(m.I32))
+	}
+	return n
+}
+
+func (m *NoStrData) Size() (n int) {
+	var l int
+	_ = l
+	if m.I64 != 0 {
+		n += 1 + sovMyRPC(uint64(m.I64))
+	}
+	if m.I32 != 0 {
+		n += 1 + sovMyRPC(uint64(m.I32))
+	}
+	if len(m.Arr) > 0 {
+		for _, e := range m.Arr {
+			l = e.Size()
+			n += 1 + l + sovMyRPC(uint64(l))
+		}
 	}
 	return n
 }
@@ -442,6 +621,114 @@ func (m *Entry) Unmarshal(dAtA []byte) error {
 				b := dAtA[iNdEx]
 				iNdEx++
 				m.Value |= (int64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMyRPC(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMyRPC
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *NoStrEntry) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMyRPC
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: NoStrEntry: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: NoStrEntry: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			m.Value = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMyRPC
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Value |= (int64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ready", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMyRPC
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Ready = bool(v != 0)
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value2", wireType)
+			}
+			m.Value2 = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMyRPC
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Value2 |= (int32(b) & 0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -790,6 +1077,125 @@ func (m *SimpleData) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *NoStrData) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMyRPC
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: NoStrData: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: NoStrData: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field I64", wireType)
+			}
+			m.I64 = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMyRPC
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.I64 |= (int64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field I32", wireType)
+			}
+			m.I32 = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMyRPC
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.I32 |= (int32(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Arr", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMyRPC
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMyRPC
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Arr = append(m.Arr, &NoStrEntry{})
+			if err := m.Arr[len(m.Arr)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMyRPC(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMyRPC
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func skipMyRPC(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0
@@ -898,17 +1304,22 @@ var (
 func init() { proto.RegisterFile("MyRPC.proto", fileDescriptorMyRPC) }
 
 var fileDescriptorMyRPC = []byte{
-	// 190 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xf6, 0xad, 0x0c, 0x0a,
-	0x70, 0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x57, 0x32, 0xe4, 0x62, 0x75, 0xcd, 0x2b, 0x29, 0xaa,
-	0x14, 0x12, 0xe2, 0x62, 0x29, 0xa9, 0x2c, 0x48, 0x95, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x02,
-	0xb3, 0x85, 0x44, 0xb8, 0x58, 0xcb, 0x12, 0x73, 0x4a, 0x53, 0x25, 0x98, 0x14, 0x18, 0x35, 0x98,
-	0x83, 0x20, 0x1c, 0xa5, 0x1c, 0x2e, 0x16, 0x97, 0xc4, 0x92, 0x44, 0x90, 0x8e, 0xe2, 0x92, 0x22,
-	0x43, 0x98, 0x0e, 0x10, 0x1b, 0x2a, 0x66, 0x04, 0xd6, 0x00, 0x11, 0x33, 0x12, 0x12, 0xe0, 0x62,
-	0xce, 0x34, 0x33, 0x91, 0x60, 0x06, 0x9b, 0x01, 0x62, 0x82, 0x45, 0x8c, 0x8d, 0x24, 0x58, 0x14,
-	0x18, 0x35, 0x58, 0x83, 0x40, 0x4c, 0x21, 0x09, 0x2e, 0xe6, 0xc4, 0xa2, 0x22, 0x09, 0x56, 0x05,
-	0x66, 0x0d, 0x6e, 0x23, 0x36, 0x3d, 0xb0, 0x93, 0x82, 0x40, 0x42, 0x4a, 0x11, 0x5c, 0x5c, 0xc1,
-	0x99, 0xb9, 0x05, 0x39, 0xa9, 0xd4, 0xb6, 0xd3, 0x49, 0xe0, 0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f,
-	0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x9c, 0xf1, 0x58, 0x8e, 0x21, 0x89, 0x0d, 0x1c, 0x26, 0xc6,
-	0x80, 0x00, 0x00, 0x00, 0xff, 0xff, 0xd3, 0xbe, 0x12, 0xf1, 0x22, 0x01, 0x00, 0x00,
+	// 261 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x91, 0xcf, 0x4a, 0xc4, 0x30,
+	0x10, 0xc6, 0x9d, 0x4d, 0x5b, 0xdc, 0xe9, 0x65, 0x09, 0x22, 0xb9, 0x58, 0x4a, 0x4e, 0x3d, 0x15,
+	0x36, 0x2b, 0x3e, 0x80, 0x7f, 0x8e, 0x2e, 0x4b, 0xf6, 0xe2, 0x35, 0x62, 0x0e, 0x0b, 0xd5, 0x96,
+	0x18, 0x85, 0xbc, 0x89, 0x8f, 0xe4, 0xd1, 0x47, 0x90, 0xfa, 0x22, 0x92, 0x49, 0x75, 0x05, 0xaf,
+	0x7b, 0xfb, 0xe6, 0xeb, 0x7c, 0x5f, 0x7f, 0x4c, 0xb0, 0xbc, 0x0d, 0x7a, 0x73, 0xd5, 0x0e, 0xae,
+	0xf7, 0xbd, 0x5c, 0x62, 0x7e, 0xf3, 0xe4, 0x5d, 0xe0, 0x1c, 0x33, 0x1f, 0x06, 0x2b, 0xa0, 0x86,
+	0x66, 0xae, 0x49, 0xf3, 0x13, 0xcc, 0x5f, 0x4d, 0xf7, 0x62, 0xc5, 0xac, 0x86, 0x86, 0xe9, 0x34,
+	0xc8, 0x0d, 0xe2, 0xba, 0xdf, 0x7a, 0x97, 0x72, 0xbf, 0x3b, 0xf0, 0x67, 0x27, 0xba, 0xce, 0x9a,
+	0x87, 0x40, 0xc9, 0x63, 0x9d, 0x06, 0x7e, 0x8a, 0x05, 0x7d, 0x56, 0x82, 0xd5, 0xd0, 0xe4, 0x7a,
+	0x9a, 0x64, 0x87, 0xd9, 0xb5, 0xf1, 0x26, 0x32, 0x3c, 0x7b, 0xb7, 0xfc, 0x61, 0x88, 0x7a, 0xf2,
+	0x14, 0x15, 0x25, 0x4f, 0xf1, 0x05, 0xb2, 0xdd, 0xc5, 0x39, 0x95, 0x30, 0x1d, 0x25, 0x39, 0x2b,
+	0x25, 0x32, 0xaa, 0x8d, 0x92, 0x0b, 0x64, 0xc6, 0x39, 0x91, 0xd7, 0xac, 0x29, 0x55, 0xd1, 0x12,
+	0xac, 0x8e, 0x96, 0xbc, 0x43, 0xdc, 0xee, 0x1e, 0x87, 0xce, 0x1e, 0xfa, 0x9f, 0x72, 0x8d, 0x73,
+	0xba, 0x0c, 0x15, 0x4f, 0x01, 0xf8, 0x17, 0x98, 0xed, 0x21, 0xcf, 0x12, 0x24, 0x23, 0xc8, 0xb2,
+	0xdd, 0x9f, 0x95, 0x48, 0x2f, 0x17, 0xef, 0x63, 0x05, 0x1f, 0x63, 0x05, 0x9f, 0x63, 0x05, 0x6f,
+	0x5f, 0xd5, 0xd1, 0x7d, 0x41, 0xaf, 0xb6, 0xfa, 0x0e, 0x00, 0x00, 0xff, 0xff, 0xfe, 0x3b, 0x6c,
+	0x66, 0xc4, 0x01, 0x00, 0x00,
 }
